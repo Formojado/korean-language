@@ -2,8 +2,8 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>韓文反應訓練 - 純淨版</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>韓文全能反應訓練 - 無限題庫</title>
     <style>
         :root {
             --primary: #4f46e5;
@@ -13,8 +13,15 @@
             --bg: #f1f5f9;
         }
 
+        * {
+            -webkit-tap-highlight-color: transparent !important;
+            -webkit-user-select: none !important;
+            user-select: none !important;
+            outline: none !important;
+        }
+
         body {
-            font-family: 'Noto Sans KR', -apple-system, sans-serif;
+            font-family: 'Noto Sans KR', sans-serif;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -22,10 +29,9 @@
             min-height: 100vh;
             margin: 0;
             background-color: var(--bg);
-            overflow: hidden; /* 防止練習時滾動 */
+            touch-action: manipulation;
         }
 
-        /* 頂部切換 */
         .mode-selector {
             margin-bottom: 20px;
             display: flex;
@@ -33,102 +39,79 @@
             padding: 6px;
             border-radius: 20px;
             gap: 5px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         .mode-btn {
-            padding: 12px 24px;
+            padding: 10px 18px;
             border: none;
             border-radius: 15px;
             background: transparent;
             cursor: pointer;
             font-weight: 800;
             color: #64748b;
-            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: 0.2s;
         }
 
         .mode-btn.active {
             background: white;
             color: var(--primary);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
 
-        /* 測驗主體 */
         .quiz-container {
             background: white;
             width: 90%;
-            max-width: 550px;
-            padding: 40px;
+            max-width: 500px;
+            padding: 30px;
             border-radius: 40px;
             box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1);
             text-align: center;
         }
 
-        .stats {
-            display: flex;
-            justify-content: space-between;
-            font-size: 1.3rem;
-            margin-bottom: 10px;
-            font-weight: 700;
-            font-variant-numeric: tabular-nums;
-        }
-
-        /* 超大韓文字 */
         #hangul-display {
-            font-size: 16rem; /* 再放大一些 */
+            font-size: 13rem;
             font-weight: 900;
-            margin: 20px 0;
+            margin: 10px 0;
             color: var(--text);
-            line-height: 1;
-            user-select: none;
+            line-height: 1.2;
         }
 
-        /* 選項按鈕 */
         .options-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 20px;
+            gap: 12px;
+            margin-top: 15px;
         }
 
         button.option {
-            padding: 25px;
-            font-size: 1.8rem;
+            padding: 20px;
+            font-size: 1.6rem;
             font-weight: 800;
             border: 3px solid #f1f5f9;
             border-radius: 24px;
             background: #ffffff;
             cursor: pointer;
             transition: all 0.1s;
-            outline: none; /* 移除點擊後的藍框 */
-            -webkit-tap-highlight-color: transparent;
         }
 
-        button.option:hover {
-            border-color: #cbd5e1;
-            background: #f8fafc;
+        button.option:focus, button.option:active {
+            background: #ffffff;
+            outline: none;
         }
 
-        /* 狀態顏色 */
-        button.correct {
-            background-color: var(--success) !important;
-            color: white !important;
-            border-color: var(--success) !important;
-            transform: scale(0.98);
-        }
+        button.correct { background-color: var(--success) !important; color: white !important; border-color: var(--success) !important; }
+        button.wrong { background-color: var(--error) !important; color: white !important; border-color: var(--error) !important; }
 
-        button.wrong {
-            background-color: var(--error) !important;
-            color: white !important;
-            border-color: var(--error) !important;
-        }
-
-        .fire { color: #f59e0b; }
+        .stats { display: flex; justify-content: space-around; font-weight: 700; color: #64748b; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
     <div class="mode-selector">
-        <button id="btn-syllables" class="mode-btn active" onclick="setMode('syllables')">單字 (가/나)</button>
+        <button id="btn-complex" class="mode-btn active" onclick="setMode('complex')">三部件 (收尾音)</button>
+        <button id="btn-syllables" class="mode-btn" onclick="setMode('syllables')">兩部件 (基礎)</button>
         <button id="btn-consonants" class="mode-btn" onclick="setMode('consonants')">子音</button>
         <button id="btn-vowels" class="mode-btn" onclick="setMode('vowels')">母音</button>
     </div>
@@ -136,132 +119,136 @@
     <div class="quiz-container">
         <div class="stats">
             <span>Score: <span id="score">0</span></span>
-            <span class="fire">🔥 <span id="streak">0</span></span>
+            <span>🔥 <span id="streak">0</span></span>
         </div>
-
-        <div id="hangul-display">가</div>
-
-        <div class="options-grid" id="options">
-            </div>
+        <div id="hangul-display">?</div>
+        <div class="options-grid" id="options"></div>
     </div>
 
 <script>
-    const data = {
-        consonants: [
-            { h: 'ㄱ', r: 'g/k' }, { h: 'ㄴ', r: 'n' }, { h: 'ㄷ', r: 'd/t' },
-            { h: 'ㄹ', r: 'r/l' }, { h: 'ㅁ', r: 'm' }, { h: 'ㅂ', r: 'b/p' },
-            { h: 'ㅅ', r: 's' }, { h: 'ㅇ', r: 'ng' }, { h: 'ㅈ', r: 'j' },
-            { h: 'ㅊ', r: 'ch' }, { h: 'ㅋ', r: 'k' }, { h: 'ㅌ', r: 't' },
-            { h: 'ㅍ', r: 'p' }, { h: 'ㅎ', r: 'h' }
-        ],
-        vowels: [
-            { h: 'ㅏ', r: 'a' }, { h: 'ㅑ', r: 'ya' }, { h: 'ㅓ', r: 'eo' },
-            { h: 'ㅕ', r: 'yeo' }, { h: 'ㅗ', r: 'o' }, { h: 'ㅛ', r: 'yo' },
-            { h: 'ㅜ', r: 'u' }, { h: 'ㅠ', r: 'yu' }, { h: 'ㅡ', r: 'eu' },
-            { h: 'ㅣ', r: 'i' }, { h: 'ㅐ', r: 'ae' }, { h: 'ㅔ', r: 'e' }
-        ],
-        syllables: [
-            { h: '가', r: 'ga' }, { h: '나', r: 'na' }, { h: '다', r: 'da' },
-            { h: '라', r: 'ra' }, { h: '마', r: 'ma' }, { h: '바', r: 'ba' },
-            { h: '사', r: 'sa' }, { h: '아', r: 'a' }, { h: '자', r: 'ja' },
-            { h: '차', r: 'cha' }, { h: '카', r: 'ka' }, { h: '타', r: 'ta' },
-            { h: '파', r: 'pa' }, { h: '하', r: 'ha' },
-            { h: '거', r: 'geo' }, { h: '너', r: 'neo' }, { h: '더', r: 'deo' },
-            { h: '러', r: 'reo' }, { h: '머', r: 'meo' }, { h: '버', r: 'beo' },
-            { h: '서', r: 'seo' }, { h: '어', r: 'eo' }, { h: '저', r: 'jeo' },
-            { h: '고', r: 'go' }, { h: '노', r: 'no' }, { h: '도', r: 'do' },
-            { h: '로', r: 'ro' }, { h: '모', r: 'mo' }, { h: '보', r: 'bo' },
-            { h: '소', r: 'so' }, { h: '오', r: 'o' }, { h: '조', r: 'jo' },
-            { h: '구', r: 'gu' }, { h: '누', r: 'nu' }, { h: '두', r: 'du' },
-            { h: '루', r: 'ru' }, { h: '무', r: 'mu' }, { h: '부', r: 'bu' },
-            { h: '수', r: 'su' }, { h: '우', r: 'u' }, { h: '주', r: 'ju' },
-            { h: '기', r: 'gi' }, { h: '니', r: 'ni' }, { h: '디', r: 'di' },
-            { h: '리', r: 'ri' }, { h: '미', r: 'mi' }, { h: '비', r: 'bi' },
-            { h: '시', r: 'si' }, { h: '이', r: 'i' }, { h: '지', r: 'ji' }
-        ]
-    };
+    // 基礎部件與羅馬拼音對照
+    const chosung = [
+        {h:'ㄱ', r:'g'}, {h:'ㄴ', r:'n'}, {h:'ㄷ', r:'d'}, {h:'ㄹ', r:'r'},
+        {h:'ㅁ', r:'m'}, {h:'ㅂ', r:'b'}, {h:'ㅅ', r:'s'}, {h:'ㅇ', r:''},
+        {h:'ㅈ', r:'j'}, {h:'ㅊ', r:'ch'}, {h:'ㅋ', r:'k'}, {h:'ㅌ', r:'t'},
+        {h:'ㅍ', r:'p'}, {h:'ㅎ', r:'h'}
+    ];
+    const jungsung = [
+        {h:'ㅏ', r:'a'}, {h:'ㅑ', r:'ya'}, {h:'ㅓ', r:'eo'}, {h:'ㅕ', r:'yeo'},
+        {h:'ㅗ', r:'o'}, {h:'ㅛ', r:'yo'}, {h:'ㅜ', r:'u'}, {h:'ㅠ', r:'yu'},
+        {h:'ㅡ', r:'eu'}, {h:'ㅣ', r:'i'}, {h:'ㅐ', r:'ae'}, {h:'ㅔ', r:'e'}
+    ];
+    const jongsung = [
+        {h:'', r:''}, {h:'ㄱ', r:'k'}, {h:'ㄴ', r:'n'}, {h:'ㄷ', r:'t'},
+        {h:'ㄹ', r:'l'}, {h:'ㅁ', r:'m'}, {h:'ㅂ', r:'p'}, {h:'ㅇ', r:'ng'}
+    ];
 
-    let currentMode = 'syllables';
-    let currentQuestion = {};
+    let currentMode = 'complex';
     let score = 0;
     let streak = 0;
 
     function setMode(mode) {
         currentMode = mode;
-        // 更新 UI 按鈕狀態
-        document.querySelectorAll('.mode-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(`btn-${mode}`).classList.add('active');
-        
         nextQuestion();
     }
 
-    function nextQuestion() {
-        const pool = data[currentMode];
-        currentQuestion = pool[Math.floor(Math.random() * pool.length)];
-        document.getElementById('hangul-display').innerText = currentQuestion.h;
+    // 生成隨機韓文字
+    function generateHangul(hasBatchim) {
+        const cIdx = Math.floor(Math.random() * chosung.length);
+        const vIdx = Math.floor(Math.random() * jungsung.length);
+        const c = chosung[cIdx];
+        const v = jungsung[vIdx];
+        
+        let charCode = 44032 + (cIdx * 588) + (vIdx * 28);
+        let roman = c.r + v.r;
 
-        // 建立選項：嚴格限制只從目前模式的資料庫挑選錯誤答案
-        let choices = [currentQuestion.r];
-        while (choices.length < 4) {
-            let randItem = pool[Math.floor(Math.random() * pool.length)];
-            if (!choices.includes(randItem.r)) {
-                choices.push(randItem.r);
-            }
+        if (hasBatchim) {
+            const bIdx = Math.floor(Math.random() * (jongsung.length - 1)) + 1; // 跳過空收尾音
+            const b = jongsung[bIdx];
+            charCode += bIdx;
+            roman += b.r;
         }
 
-        // 隨機排序
+        // 特殊處理：當ㅇ作為初聲時不發音，但羅馬拼音如果是單獨母音開頭
+        if (c.h === 'ㅇ') {
+            roman = v.r + (hasBatchim ? jongsung[charCode % 28].r : "");
+        }
+
+        return { h: String.fromCharCode(charCode), r: roman };
+    }
+
+    function nextQuestion() {
+        window.getSelection()?.removeAllRanges();
+        document.activeElement?.blur();
+
+        let question;
+        if (currentMode === 'consonants') {
+            const list = [{h:'ㄱ', r:'g'}, {h:'ㄴ', r:'n'}, {h:'ㄷ', r:'d'}, {h:'ㄹ', r:'r'}, {h:'ㅁ', r:'m'}, {h:'ㅂ', r:'b'}, {h:'ㅅ', r:'s'}, {h:'ㅇ', r:'ng'}, {h:'ㅈ', r:'j'}, {h:'ㅎ', r:'h'}];
+            question = list[Math.floor(Math.random() * list.length)];
+        } else if (currentMode === 'vowels') {
+            const list = jungsung;
+            question = list[Math.floor(Math.random() * list.length)];
+        } else if (currentMode === 'syllables') {
+            question = generateHangul(false);
+        } else {
+            question = generateHangul(true);
+        }
+
+        document.getElementById('hangul-display').innerText = question.h;
+
+        // 產生選項
+        let choices = [question.r];
+        while (choices.length < 4) {
+            let fake;
+            if (currentMode === 'consonants' || currentMode === 'vowels') {
+                fake = (currentMode === 'consonants' ? chosung : jungsung)[Math.floor(Math.random() * 10)].r;
+            } else {
+                fake = generateHangul(currentMode === 'complex').r;
+            }
+            if (!choices.includes(fake) && fake !== "") choices.push(fake);
+        }
         choices.sort(() => Math.random() - 0.5);
 
-        // 渲染按鈕
         const container = document.getElementById('options');
-        container.innerHTML = ''; // 徹底清除舊按鈕
-        
+        container.innerHTML = '';
         choices.forEach(choice => {
             const btn = document.createElement('button');
             btn.className = 'option';
             btn.innerText = choice;
-            btn.onclick = (e) => {
-                checkAnswer(choice, btn);
-                btn.blur(); // 關鍵：移除點擊後的焦點虛線框/殘留
+            btn.onpointerdown = (e) => {
+                e.preventDefault();
+                checkAnswer(choice, btn, question.r);
             };
             container.appendChild(btn);
         });
     }
 
-    function checkAnswer(selected, btn) {
-        const allButtons = document.querySelectorAll('.option');
-        // 鎖定所有按鈕防止重複點擊
-        allButtons.forEach(b => b.style.pointerEvents = 'none');
+    function checkAnswer(selected, btn, correctR) {
+        const buttons = document.querySelectorAll('.option');
+        if (buttons[0].style.pointerEvents === 'none') return;
+        buttons.forEach(b => b.style.pointerEvents = 'none');
 
-        if (selected === currentQuestion.r) {
+        if (selected === correctR) {
             btn.classList.add('correct');
             score += 10;
             streak++;
-            updateStats();
-            setTimeout(nextQuestion, 200); // 答對時的節奏極快
+            setTimeout(nextQuestion, 200);
         } else {
             btn.classList.add('wrong');
             streak = 0;
-            updateStats();
-            // 顯示正確答案
-            allButtons.forEach(b => {
-                if (b.innerText === currentQuestion.r) b.classList.add('correct');
+            buttons.forEach(b => {
+                if (b.innerText === correctR) b.classList.add('correct');
             });
-            setTimeout(nextQuestion, 1200); // 答錯停留較久
+            setTimeout(nextQuestion, 1200);
         }
-    }
-
-    function updateStats() {
         document.getElementById('score').innerText = score;
         document.getElementById('streak').innerText = streak;
     }
 
-    // 初始啟動
     nextQuestion();
 </script>
 
 </body>
 </html>
-
