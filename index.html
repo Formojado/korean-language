@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>韓文反應力訓練 Pro</title>
+    <title>韓文反應力最強訓練</title>
     <style>
         :root {
-            --primary: #6366f1;
-            --success: #22c55e;
-            --error: #ef4444;
-            --text: #1f2937;
-            --bg: #f3f4f6;
+            --primary: #4f46e5;
+            --success: #10b981;
+            --error: #f43f5e;
+            --text: #1e293b;
+            --bg: #f8fafc;
         }
 
         body {
-            font-family: 'Inter', -apple-system, sans-serif;
+            font-family: 'Noto Sans KR', sans-serif;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -25,80 +25,81 @@
             color: var(--text);
         }
 
-        /* 模式切換區 */
-        .mode-container {
-            margin-bottom: 20px;
+        /* 模式切換區 - 讓它看起來像個專業 App */
+        .mode-selector {
+            margin-bottom: 25px;
             display: flex;
-            gap: 10px;
-            background: #fff;
-            padding: 8px;
-            border-radius: 50px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            background: #e2e8f0;
+            padding: 5px;
+            border-radius: 16px;
         }
 
         .mode-btn {
-            padding: 10px 20px;
+            padding: 12px 24px;
             border: none;
-            border-radius: 25px;
+            border-radius: 12px;
             background: transparent;
             cursor: pointer;
-            font-weight: 600;
-            transition: 0.3s;
-            color: #666;
+            font-weight: 700;
+            color: #64748b;
+            transition: 0.2s;
         }
 
         .mode-btn.active {
-            background: var(--primary);
-            color: white;
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
         }
 
-        /* 主容器 */
-        .quiz-card {
+        /* 核心測驗容器 */
+        .quiz-container {
             background: white;
-            width: 95%;
+            width: 90%;
             max-width: 500px;
             padding: 40px;
-            border-radius: 32px;
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            border-radius: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
             text-align: center;
         }
 
-        /* 超大題目區 */
-        #hangul-display {
-            font-size: 12rem; /* 極大字體 */
-            font-weight: 900;
-            margin: 10px 0;
-            line-height: 1;
-            color: var(--text);
-            text-shadow: 2px 2px 0px #eee;
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            font-weight: 600;
         }
 
-        /* 選項區 */
+        /* 題目字體：極大化 */
+        #hangul-display {
+            font-size: 15rem; /* 字體再加大 */
+            font-weight: 900;
+            margin: 0;
+            color: var(--text);
+            line-height: 1.2;
+        }
+
         .options-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-top: 40px;
+            gap: 15px;
+            margin-top: 30px;
         }
 
         button.option {
-            padding: 20px;
-            font-size: 1.5rem;
-            font-weight: 600;
-            border: 3px solid #e5e7eb;
-            border-radius: 20px;
-            background: white;
+            padding: 22px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            border: 3px solid #f1f5f9;
+            border-radius: 24px;
+            background: #f8fafc;
             cursor: pointer;
-            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.2s;
         }
 
         button.option:hover {
             border-color: var(--primary);
-            transform: translateY(-2px);
-        }
-
-        button.option:active {
-            transform: scale(0.95);
+            background: #eef2ff;
         }
 
         button.correct {
@@ -113,36 +114,26 @@
             border-color: var(--error) !important;
         }
 
-        /* 統計區 */
-        .stats-bar {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            margin-bottom: 20px;
-            font-size: 1.1rem;
-        }
-
-        .streak-count {
+        .streak-fire {
             color: #f59e0b;
-            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
-    <div class="mode-container">
-        <button class="mode-btn active" onclick="setMode('all', this)">全部</button>
+    <div class="mode-selector">
+        <button class="mode-btn active" onclick="setMode('syllables', this)">單字 (가/나)</button>
         <button class="mode-btn" onclick="setMode('consonants', this)">子音</button>
         <button class="mode-btn" onclick="setMode('vowels', this)">母音</button>
     </div>
 
-    <div class="quiz-card">
-        <div class="stats-bar">
-            <span>Score: <b id="score">0</b></span>
-            <span class="streak-count">🔥 <span id="streak">0</span></span>
+    <div class="quiz-container">
+        <div class="stats">
+            <span>Score: <span id="score">0</span></span>
+            <span class="streak-fire">🔥 <span id="streak">0</span></span>
         </div>
 
-        <div id="hangul-display">ㄱ</div>
+        <div id="hangul-display">가</div>
 
         <div class="options-grid" id="options">
             </div>
@@ -154,32 +145,37 @@
             { h: 'ㄱ', r: 'g/k' }, { h: 'ㄴ', r: 'n' }, { h: 'ㄷ', r: 'd/t' },
             { h: 'ㄹ', r: 'r/l' }, { h: 'ㅁ', r: 'm' }, { h: 'ㅂ', r: 'b/p' },
             { h: 'ㅅ', r: 's' }, { h: 'ㅇ', r: 'ng' }, { h: 'ㅈ', r: 'j' },
-            { h: 'ㅊ', r: 'ch' }, { h: 'ㅋ', r: 'k' }, { h: 'ㅌ', r: 't' },
-            { h: 'ㅍ', r: 'p' }, { h: 'ㅎ', r: 'h' }
+            { h: 'ㅊ', r: 'ch' }, { h: 'ㅎ', r: 'h' }
         ],
         vowels: [
             { h: 'ㅏ', r: 'a' }, { h: 'ㅑ', r: 'ya' }, { h: 'ㅓ', r: 'eo' },
             { h: 'ㅕ', r: 'yeo' }, { h: 'ㅗ', r: 'o' }, { h: 'ㅛ', r: 'yo' },
             { h: 'ㅜ', r: 'u' }, { h: 'ㅠ', r: 'yu' }, { h: 'ㅡ', r: 'eu' },
-            { h: 'ㅣ', r: 'i' }, { h: 'ㅐ', r: 'ae' }, { h: 'ㅔ', r: 'e' }
+            { h: 'ㅣ', r: 'i' }
+        ],
+        // 組合字模式：基礎組合
+        syllables: [
+            { h: '가', r: 'ga' }, { h: '나', r: 'na' }, { h: '다', r: 'da' },
+            { h: '라', r: 'ra' }, { h: '마', r: 'ma' }, { h: '바', r: 'ba' },
+            { h: '사', r: 'sa' }, { h: '아', r: 'a' }, { h: '자', r: 'ja' },
+            { h: '하', r: 'ha' }, { h: '고', r: 'go' }, { h: '노', r: 'no' },
+            { h: '도', r: 'do' }, { h: '로', r: 'ro' }, { h: '모', r: 'mo' },
+            { h: '보', r: 'bo' }, { h: '소', r: 'so' }, { h: '오', r: 'o' },
+            { h: '주', r: 'ju' }, { h: '구', r: 'gu' }, { h: '누', r: 'nu' },
+            { h: '미', r: 'mi' }, { h: '비', r: 'bi' }, { h: '시', r: 'si' },
+            { h: '기', r: 'gi' }, { h: '니', r: 'ni' }, { h: '리', r: 'ri' }
         ]
     };
 
-    let currentPool = [...data.consonants, ...data.vowels];
+    let currentPool = data.syllables; // 預設為單字模式
     let currentQuestion = {};
     let score = 0;
     let streak = 0;
 
     function setMode(mode, btn) {
-        // 切換按鈕樣式
         document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-
-        // 切換題庫
-        if (mode === 'consonants') currentPool = data.consonants;
-        else if (mode === 'vowels') currentPool = data.vowels;
-        else currentPool = [...data.consonants, ...data.vowels];
-
+        currentPool = data[mode];
         nextQuestion();
     }
 
@@ -187,24 +183,26 @@
         currentQuestion = currentPool[Math.floor(Math.random() * currentPool.length)];
         document.getElementById('hangul-display').innerText = currentQuestion.h;
 
+        // 產生選項
         let choices = [currentQuestion.r];
-        // 從全部資料中挑選干擾項，這樣選項才會更多元
-        const allOptions = [...data.consonants, ...data.vowels];
+        // 混合所有資料庫來當干擾項
+        const allPossible = [...data.consonants, ...data.vowels, ...data.syllables];
+        
         while (choices.length < 4) {
-            let randomR = allOptions[Math.floor(Math.random() * allOptions.length)].r;
-            if (!choices.includes(randomR)) choices.push(randomR);
+            let rand = allPossible[Math.floor(Math.random() * allPossible.length)].r;
+            if (!choices.includes(rand)) choices.push(rand);
         }
 
         choices.sort(() => Math.random() - 0.5);
 
-        const optionsContainer = document.getElementById('options');
-        optionsContainer.innerHTML = '';
+        const container = document.getElementById('options');
+        container.innerHTML = '';
         choices.forEach(choice => {
             const btn = document.createElement('button');
             btn.className = 'option';
             btn.innerText = choice;
             btn.onclick = () => checkAnswer(choice, btn);
-            optionsContainer.appendChild(btn);
+            container.appendChild(btn);
         });
     }
 
@@ -218,20 +216,19 @@
             streak++;
             document.getElementById('score').innerText = score;
             document.getElementById('streak').innerText = streak;
-            setTimeout(nextQuestion, 300); // 答對時切換超快，訓練直覺
+            setTimeout(nextQuestion, 250); // 答對反應要快！
         } else {
             btn.classList.add('wrong');
             streak = 0;
             document.getElementById('streak').innerText = streak;
-            
             buttons.forEach(b => {
                 if (b.innerText === currentQuestion.r) b.classList.add('correct');
             });
-            setTimeout(nextQuestion, 1000); // 答錯停 1 秒讓你記住
+            setTimeout(nextQuestion, 1000); // 答錯停一下記憶
         }
     }
 
-    // 初始化
+    // 開始遊戲
     nextQuestion();
 </script>
 
