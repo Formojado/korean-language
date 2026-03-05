@@ -1,193 +1,190 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KOREA SCANNER: PRECISION 100</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <style>
-    :root { --kr-red: #CD2E3A; --kr-blue: #0047A0; }
-    html, body { height: 100%; margin: 0; font-family: 'Malgun Gothic', 'Noto Sans TC', sans-serif; background: #fff; overflow: hidden; }
-    
-    /* 移除領海感的地圖濾鏡 */
-    #map { height: 100vh; width: 100vw; z-index: 1; background: #e0f2f1; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>韓文字母快速反應練習</title>
+    <style>
+        :root {
+            --primary-color: #5d5cde;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+            --bg-color: #f8f9fa;
+        }
 
-    /* 頂部 UI 容器 */
-    .header-ui { 
-        position: absolute; top: 0; left: 0; width: 100%; height: 320px; 
-        z-index: 1001; pointer-events: none;
-        display: flex; justify-content: center; /* 確保內容水平置中 */
-    }
-    .viewport { position: relative; width: 100%; height: 320px; overflow: hidden; display: flex; justify-content: center; }
-    
-    .belt { 
-        display: flex; position: absolute; left: 50%; top: 40px;
-        transform: translateX(-50%); /* 初始位置置中 */
-        transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-    }
-    
-    /* 卡片設計：文字絕對置中 */
-    .city-card { 
-        width: 260px; padding: 30px; margin: 0 20px; background: #fff; 
-        border: 6px solid #000; border-radius: 24px; opacity: 0.1; transform: scale(0.85); transition: 0.5s;
-        display: flex; flex-direction: column; align-items: center; justify-content: center;
-        flex-shrink: 0; box-shadow: 12px 12px 0px #000; position: relative;
-    }
-    .city-card.active { opacity: 1; transform: scale(1.1); box-shadow: 15px 15px 0px var(--kr-red); }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: var(--bg-color);
+        }
 
-    /* 完美的太極 SVG */
-    .tae-svg { width: 150px; height: 150px; position: absolute; opacity: 0.1; z-index: 0; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .container {
+            text-align: center;
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 400px;
+        }
 
-    .city-name-ko { font-size: 3rem; font-weight: 900; color: #000; z-index: 2; margin: 0; text-align: center; }
-    .city-name-cn { font-size: 1.8rem; color: #333; font-weight: bold; z-index: 2; text-align: center; }
+        #hangul-display {
+            font-size: 8rem;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #333;
+            min-height: 160px;
+        }
 
-    /* 數據版面 */
-    .stats-panel { 
-        position: absolute; bottom: 30px; left: 30px; z-index: 1002; background: #fff; 
-        padding: 15px 35px; border: 5px solid #000; border-radius: 15px; box-shadow: 10px 10px 0px #000;
-        font-weight: 900; font-size: 1.2rem;
-    }
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
 
-    /* 按鈕置中 */
-    .control-layer { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); z-index: 1005; }
-    .btn { 
-        padding: 20px 60px; font-size: 1.6rem; font-weight: 900; cursor: pointer; 
-        border-radius: 25px; border: 5px solid #000; color: #fff; display: none; 
-        box-shadow: 8px 8px 0px #000; text-transform: uppercase;
-    }
-    #confirmBtn { background: var(--kr-red); }
-    #nextBtn { background: var(--kr-blue); }
+        button {
+            padding: 15px;
+            font-size: 1.2rem;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
 
-    /* 鮮豔的開頭畫面 */
-    .modal-overlay { 
-        position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 2000; 
-        background: radial-gradient(circle, #fff 0%, #d1d1d1 100%); 
-    }
-    .start-box { 
-        text-align: center; border: 12px solid #000; padding: 70px; background: #fff; 
-        width: 500px; border-radius: 50px; box-shadow: 40px 40px 0px var(--kr-blue);
-        display: flex; flex-direction: column; align-items: center; justify-content: center;
-    }
-    
-    .title-area { 
-        padding: 10px 30px; background: #000; color: #fff; transform: skew(-5deg); margin-bottom: 20px;
-    }
-  </style>
+        button:hover {
+            border-color: var(--primary-color);
+            background-color: #f0f0ff;
+        }
+
+        button.correct {
+            background-color: var(--success-color);
+            color: white;
+            border-color: var(--success-color);
+        }
+
+        button.wrong {
+            background-color: var(--error-color);
+            color: white;
+            border-color: var(--error-color);
+        }
+
+        .stats {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-around;
+            color: #666;
+        }
+
+        .streak {
+            color: #e67e22;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-  <div id="map"></div>
-  <div class="header-ui">
-    <div class="viewport"><div class="belt" id="belt"></div></div>
-  </div>
-  
-  <div class="stats-panel" id="statsPanel" style="display:none">
-    <div id="score">SCORE: 0</div>
-    <div style="color: var(--kr-red);"><span id="progress">0</span> / <span id="total">0</span></div>
-  </div>
 
-  <div class="control-layer">
-    <button class="btn" id="confirmBtn">CONFIRM [SPACE]</button>
-    <button class="btn" id="nextBtn">NEXT MISSION [SPACE]</button>
-  </div>
-
-  <div id="startModal" class="modal-overlay">
-    <div class="start-box">
-      <div class="title-area"><h1 style="font-size: 3rem; font-weight: 900; margin:0;">KOREA SCANNER</h1></div>
-      <div id="countDisplay" style="font-size: 9rem; font-weight: 900; margin: 10px 0; color: #000; line-height: 1;">100</div>
-      <p style="font-weight: 900; letter-spacing: 2px;">SELECT TARGET QUANTITY</p>
-      <input type="range" id="citySlider" min="5" max="100" value="100" style="width:100%; accent-color: #000; margin-bottom: 30px;">
-      <button id="startBtn" style="width:100%; padding:25px; background:var(--kr-red); color:#fff; font-weight:900; border:5px solid #000; border-radius:20px; cursor:pointer; font-size:2rem; box-shadow: 8px 8px 0px #000;">START MISSION</button>
+<div class="container">
+    <div class="stats">
+        <div>得分: <span id="score">0</span></div>
+        <div class="streak">連擊: <span id="streak">0</span></div>
     </div>
-  </div>
+    
+    <div id="hangul-display">?</div>
+    
+    <div class="options-grid" id="options">
+        </div>
+</div>
 
-  <script>
-    const DB = [{ko:"서울",cn:"首爾",coords:[37.5665,126.9780]},{ko:"부산",cn:"釜山",coords:[35.1796,129.0756]},{ko:"인천",cn:"仁川",coords:[37.4563,126.7052]},{ko:"대구",cn:"大邱",coords:[35.8714,128.6014]},{ko:"대전",cn:"大田",coords:[36.3504,127.3845]},{ko:"광주",cn:"光州",coords:[35.1595,126.8526]},{ko:"울산",cn:"蔚山",coords:[35.5384,129.3114]},{ko:"세종",cn:"世宗",coords:[36.4800,127.2890]},{ko:"수원",cn:"水原",coords:[37.2636,127.0286]},{ko:"제주",cn:"濟州",coords:[33.4996,126.5312]},{ko:"포항",cn:"浦項",coords:[36.0190,129.3435]},{ko:"창원",cn:"昌原",coords:[35.2280,128.6811]},{ko:"전주",cn:"全州",coords:[35.8242,127.1480]},{ko:"청주",cn:"清州",coords:[36.6424,127.4890]},{ko:"천안",cn:"天安",coords:[36.8151,127.1139]},{ko:"강릉",cn:"江陵",coords:[37.7519,128.8761]}];
+<script>
+    const hangulData = [
+        // 子音
+        { h: 'ㄱ', r: 'g/k' }, { h: 'ㄴ', r: 'n' }, { h: 'ㄷ', r: 'd/t' },
+        { h: 'ㄹ', r: 'r/l' }, { h: 'ㅁ', r: 'm' }, { h: 'ㅂ', r: 'b/p' },
+        { h: 'ㅅ', r: 's' }, { h: 'ㅇ', r: 'ng' }, { h: 'ㅈ', r: 'j' },
+        { h: 'ㅊ', r: 'ch' }, { h: 'ㅋ', r: 'k' }, { h: 'ㅌ', r: 't' },
+        { h: 'ㅍ', r: 'p' }, { h: 'ㅎ', r: 'h' },
+        // 母音
+        { h: 'ㅏ', r: 'a' }, { h: 'ㅑ', r: 'ya' }, { h: 'ㅓ', r: 'eo' },
+        { h: 'ㅕ', r: 'yeo' }, { h: 'ㅗ', r: 'o' }, { h: 'ㅛ', r: 'yo' },
+        { h: 'ㅜ', r: 'u' }, { h: 'ㅠ', r: 'yu' }, { h: 'ㅡ', r: 'eu' },
+        { h: 'ㅣ', r: 'i' }
+    ];
 
-    let cities=[], idx=0, score=0, currentClick=null, isAnswered=false;
-    let pMarker=null, tMarker=null, line=null;
+    let currentQuestion = {};
+    let score = 0;
+    let streak = 0;
 
-    // 太極 SVG：上紅下藍，橫向流動
-    const TAEGEUK_SVG = `
-    <svg class="tae-svg" viewBox="0 0 100 100">
-      <circle cx="50" cy="50" r="50" fill="#0047A0" />
-      <path d="M0,50 A50,50 0 0,1 100,50 L50,50 Z" fill="#CD2E3A" />
-      <circle cx="25" cy="50" r="25" fill="#CD2E3A" />
-      <circle cx="75" cy="50" r="25" fill="#0047A0" />
-    </svg>`;
-
-    // 地圖設定：使用明亮色調且不顯示不必要的邊界
-    const map = L.map('map',{zoomControl:false, attributionControl:false}).setView([36.2, 127.8], 7);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png').addTo(map);
-
-    document.getElementById('citySlider').oninput = function() { document.getElementById('countDisplay').innerText = this.value; };
-
-    function startMission() {
-        const num = parseInt(document.getElementById('citySlider').value);
-        cities = [...DB].sort(() => Math.random() - 0.5).slice(0, num);
-        document.getElementById('startModal').style.display = 'none';
-        document.getElementById('statsPanel').style.display = 'flex';
-        document.getElementById('total').innerText = cities.length;
-
-        const belt = document.getElementById('belt');
-        belt.innerHTML = cities.map(c => `
-            <div class="city-card">
-                ${TAEGEUK_SVG}
-                <div class="city-name-ko">${c.ko}</div>
-                <div class="city-name-cn">${c.cn}</div>
-            </div>`).join('');
-        refreshRound();
+    function initGame() {
+        nextQuestion();
     }
 
-    function refreshRound() {
-        isAnswered = false; currentClick = null;
-        if(pMarker) map.removeLayer(pMarker); if(tMarker) map.removeLayer(tMarker); if(line) map.removeLayer(line);
-        document.getElementById('confirmBtn').style.display = 'none';
-        document.getElementById('nextBtn').style.display = 'none';
-        document.getElementById('progress').innerText = idx + 1;
-        
-        const cards = document.querySelectorAll('.city-card');
-        cards.forEach(c => c.classList.remove('active'));
-        const activeCard = cards[idx];
-        activeCard.classList.add('active');
-        
-        // 絕對置中計算
-        const belt = document.getElementById('belt');
-        const offset = activeCard.offsetLeft + (activeCard.offsetWidth / 2);
-        belt.style.transform = `translateX(${-offset}px)`;
-        map.flyTo([36.2, 127.8], 7);
+    function nextQuestion() {
+        // 隨機選一個題目
+        currentQuestion = hangulData[Math.floor(Math.random() * hangulData.length)];
+        document.getElementById('hangul-display').innerText = currentQuestion.h;
+
+        // 產生選項 (1個正確 + 3個隨機錯誤)
+        let choices = [currentQuestion.r];
+        while (choices.length < 4) {
+            let randomChar = hangulData[Math.floor(Math.random() * hangulData.length)].r;
+            if (!choices.includes(randomChar)) {
+                choices.push(randomChar);
+            }
+        }
+
+        // 打亂選項順序
+        choices.sort(() => Math.random() - 0.5);
+
+        // 渲染按鈕
+        const optionsContainer = document.getElementById('options');
+        optionsContainer.innerHTML = '';
+        choices.forEach(choice => {
+            const btn = document.createElement('button');
+            btn.innerText = choice;
+            btn.onclick = () => checkAnswer(choice, btn);
+            optionsContainer.appendChild(btn);
+        });
     }
 
-    map.on('click', e => {
-        if(isAnswered) return;
-        currentClick = e.latlng;
-        if(pMarker) map.removeLayer(pMarker);
-        // 設定點擊標示與答案標示大小一致 (radius: 12)
-        pMarker = L.circleMarker(e.latlng, {radius:12, color:'#000', fillColor: '#0072ff', weight:5, fillOpacity:1}).addTo(map);
-        document.getElementById('confirmBtn').style.display = 'block';
-    });
+    function checkAnswer(selected, btn) {
+        const buttons = document.querySelectorAll('#options button');
+        // 禁用所有按鈕防止連點
+        buttons.forEach(b => b.style.pointerEvents = 'none');
 
-    function handleConfirm() {
-        isAnswered = true;
-        document.getElementById('confirmBtn').style.display = 'none';
-        const target = cities[idx];
-        const dist = map.distance(currentClick, target.coords) / 1000;
-        const pts = Math.round(5000 * Math.pow(Math.E, -dist / 100));
-        
-        // 答案標示大小與點擊點相同 (radius: 12)
-        tMarker = L.circleMarker(target.coords, {radius:12, color:'#000', fillColor: '#ff3c4c', weight:5, fillOpacity:1}).addTo(map);
-        line = L.polyline([currentClick, target.coords], {color: '#000', weight:4, dashArray:'10,10'}).addTo(map);
-        
-        score += pts;
-        document.getElementById('score').innerText = `SCORE: ${score}`;
-        map.flyTo(target.coords, 10);
-        setTimeout(() => document.getElementById('nextBtn').style.display = 'block', 600);
+        if (selected === currentQuestion.r) {
+            btn.classList.add('correct');
+            score += 10;
+            streak++;
+            document.getElementById('score').innerText = score;
+            document.getElementById('streak').innerText = streak;
+            
+            // 答對後稍微延遲就進入下一題，保持節奏
+            setTimeout(nextQuestion, 400);
+        } else {
+            btn.classList.add('wrong');
+            streak = 0; // 斷連擊
+            document.getElementById('streak').innerText = streak;
+            
+            // 找尋正確答案並標示
+            buttons.forEach(b => {
+                if (b.innerText === currentQuestion.r) {
+                    b.classList.add('correct');
+                }
+            });
+
+            // 答錯停留久一點讓你記憶
+            setTimeout(nextQuestion, 1200);
+        }
     }
 
-    document.getElementById('startBtn').onclick = startMission;
-    document.getElementById('confirmBtn').onclick = handleConfirm;
-    document.getElementById('nextBtn').onclick = () => { idx++; if(idx < cities.length) refreshRound(); else location.reload(); };
-    window.addEventListener('keydown', e => { if(e.code === 'Space') { if(isAnswered) document.getElementById('nextBtn').click(); else if(currentClick) handleConfirm(); } });
-  </script>
+    initGame();
+</script>
+
 </body>
 </html>
